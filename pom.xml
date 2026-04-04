@@ -156,7 +156,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>				
 					<image> <!--DOCKER IMAGE BUILDER-->
-						<name>joeyekpe/webbookemarker-api</name>
+						<name>joeyekpe/webbookmarker-api:latest</name>
 					</image>
 					<excludes>
 						<exclude>
