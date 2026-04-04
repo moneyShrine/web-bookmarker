@@ -1,4 +1,4 @@
-name: BuildCI
+name: Build and Publish WebBookmarker-API
 
 on:
   push:
@@ -12,10 +12,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Debug folder structure
-        run: ls -R
+        run: ls -la
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -24,20 +25,23 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build with Maven
-        run: mvn verify
+      - name: Build with Maven (verify)
+        run: ./mvnw clean verify -DskipTests
 
-      # ✅ Build Docker image using Spring Boot Buildpacks
-      - name: Build Docker Image (Buildpacks)
+      # Build Docker image only on master branch
+      - name: Build Docker Image with Buildpacks
         if: github.ref == 'refs/heads/master'
-        run: mvn spring-boot:build-image -DskipTests -Dspring-boot.build-image.imageName=${{ secrets.DOCKER_USERNAME }}/webbookmarker-api:latest
+        run: |
+          ./mvnw spring-boot:build-image \
+            -DskipTests \
+            -Dspring-boot.build-image.imageName=${{ secrets.DOCKER_USERNAME }}/webbookmarker-api:latest
 
-      # ✅ Login to Docker Hub
+      # Login to Docker Hub
       - name: Login to Docker Hub
         if: github.ref == 'refs/heads/master'
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      # ✅ Push Image
-      - name: Push Docker Image
+      # Push the image
+      - name: Push Docker Image to Docker Hub
         if: github.ref == 'refs/heads/master'
         run: docker push ${{ secrets.DOCKER_USERNAME }}/webbookmarker-api:latest
