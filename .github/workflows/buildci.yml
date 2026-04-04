@@ -35,7 +35,7 @@ jobs:
         run: |
           ./mvnw spring-boot:build-image \
             -DskipTests \
-            -Dspring-boot.build-image.imageName=${{ secrets.DOCKER_USERNAME }}joeyekpe/webbookmarker-api:latest
+            -Dspring-boot.build-image.imageName=${{ secrets.DOCKER_USERNAME }}/webbookmarker-api:latest
 
       # Login to Docker Hub
       - name: Login to Docker Hub
@@ -45,4 +45,4 @@ jobs:
       # Push the image
       - name: Push Docker Image to Docker Hub
         if: github.ref == 'refs/heads/master'
-        run: docker push ${{ secrets.DOCKER_USERNAME }}joeyekpe/webbookmarker-api:latest
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/webbookmarker-api:latest
