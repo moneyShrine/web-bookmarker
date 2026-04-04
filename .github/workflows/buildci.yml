@@ -1,0 +1,45 @@
+name: BuildCI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build-webbookmarker:
+    name: Build WebBookmarker-API
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./webbookmarker
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn verify
+
+      # ✅ Build Docker image using Spring Boot Buildpacks
+      - name: Build Docker Image (Buildpacks)
+        if: github.ref == 'refs/heads/master'
+        run: mvn spring-boot:build-image -DskipTests \
+          -Dspring-boot.build-image.imageName=${{ secrets.DOCKER_USERNAME }}/webbookmarker-api:latest
+
+      # ✅ Login to Docker Hub
+      - name: Login to Docker Hub
+        if: github.ref == 'refs/heads/master'
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      # ✅ Push Image
+      - name: Push Docker Image
+        if: github.ref == 'refs/heads/master'
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/webbookmarker-api:latest
