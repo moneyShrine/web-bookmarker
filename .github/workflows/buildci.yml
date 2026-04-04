@@ -15,15 +15,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Debug folder structure
-        run: ls -la
-
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
+
+      # Make sure mvnw is executable (extra safety)
+      - name: Make Maven Wrapper executable
+        run: chmod +x ./mvnw
 
       - name: Build with Maven (verify)
         run: ./mvnw clean verify -DskipTests
