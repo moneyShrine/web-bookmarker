@@ -3,12 +3,9 @@ name: Build and Publish WebBookmarker-API
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
 
 jobs:
   build-webbookmarker:
-    name: Build WebBookmarker-API
     runs-on: ubuntu-latest
 
     steps:
@@ -22,27 +19,29 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      # Make sure mvnw is executable (extra safety)
       - name: Make Maven Wrapper executable
         run: chmod +x ./mvnw
 
-      - name: Build with Maven (verify)
+      - name: Build with Maven
         run: ./mvnw clean verify -DskipTests
 
-      # Build Docker image only on master branch
-      - name: Build Docker Image with Buildpacks
+      # ✅ FIXED IMAGE NAME
+      - name: Build Docker Image
         if: github.ref == 'refs/heads/master'
         run: |
           ./mvnw spring-boot:build-image \
             -DskipTests \
-            -Dspring-boot.build-image.imageName=${{ secrets.DOCKER_USERNAME }}webbookmarker-api:latest
+            -Dspring-boot.build-image.imageName=${{ secrets.DOCKER_USERNAME }}/webbookmarker-api:latest
 
-      # Login to Docker Hub
+      # ✅ Debug (optional but helpful)
+      - name: List Docker Images
+        run: docker images
+
       - name: Login to Docker Hub
         if: github.ref == 'refs/heads/master'
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      # Push the image
-      - name: Push Docker Image to Docker Hub
+      # ✅ FIXED PUSH
+      - name: Push Docker Image
         if: github.ref == 'refs/heads/master'
-        run: docker push ${{ secrets.DOCKER_USERNAME }}webbookmarker-api:latest
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/webbookmarker-api:latest
