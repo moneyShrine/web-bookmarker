@@ -11,7 +11,7 @@
 	<groupId>com.tms</groupId>
 	<artifactId>webbookmarker</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>webbookmarker</name>
+	<name>webbookmarker-api</name>
 	<description>Website bookmarker</description>
 	<url/>
 	<licenses>
@@ -155,9 +155,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>				
-					<image> <!--DOCKER IMAGE BUILDER-->
-						<name>webbookmarker-api</name>
-					</image>
+					<imageName>${env.DOCKER_USERNAME}/webbookmarker-api:latest</imageName>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>
